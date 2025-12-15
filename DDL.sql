@@ -97,6 +97,7 @@ UPDATE LST SET date_lst = '2023-07-01', source = 'Landsat 8', projection = '4326
 UPDATE LST SET date_lst = '2024-07-01', source = 'Landsat 8', projection = '4326' WHERE id_scene = 12;
 UPDATE LST SET date_lst = '2025-07-01', source = 'Landsat 8', projection = '4326' WHERE id_scene = 13;
 
+
 -------------------------
 -- 4. Créer et peupler la vue matérialisée THEATRE_LST_SERIE
 -------------------------
