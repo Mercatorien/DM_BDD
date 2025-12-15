@@ -6,7 +6,7 @@ Nicolas Massot, Bases de données géographiques
 
 ## Étude des îlots de chaleur urbains pendant le Festival IN d'Avignon (juillet 2025)
 
-[Accéder au dépôt GitHub](https://github.com/Mercatorien/DM_BDD/)
+Accéder au dépôt [GitHub](https://github.com/Mercatorien/DM_BDD/) <br>
 Dump de la base : [Proton Drive](https://drive.proton.me/urls/53NYFJ9H58#31iN0GC80pBA)
 
 ## 1. Contextualisation
