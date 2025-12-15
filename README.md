@@ -6,9 +6,11 @@ Nicolas Massot, Bases de données géographiques
 
 ## Étude des îlots de chaleur urbains pendant le Festival IN d'Avignon (juillet 2025)
 
+[Accéder au dépôt GitHub](https://github.com/Mercatorien/DM_BDD/)
+
 ## 1. Contextualisation
 
-Le Festival d'Avignon est la plus importante manifestation de théâtre et de spectacle vivant du monde, par le nombre de créations et de spectateurs réunis. Il se déroule chaque année au mois de juillet. Cependant, le changement climatique menace sa tenue. En effet, avec des témpératures allant au-delà des 40°C, les festivaliers sont de plus en plus dans une situation d'inconfort thermique, lui-même exacerbé par une multitude de facteurs.
+Le Festival d'Avignon est la plus importante manifestation de théâtre et de spectacle vivant du monde, par le nombre de créations et de spectateurs réunis. Il se déroule chaque année au mois de juillet. Cependant, le changement climatique menace sa tenue. En effet, avec des températures allant au-delà des 40°C, les festivaliers sont de plus en plus dans une situation d'inconfort thermique, lui-même exacerbé par une multitude de facteurs.
 
 <table>
   <thead>
@@ -71,21 +73,25 @@ Le Festival d'Avignon est la plus importante manifestation de théâtre et de sp
 </table>
 </div>
 
-L'objectif est donc de recenser les théâtres du Festival d'Avignon IN pour 2025 en incluant des attributs descriptifs, ainsi que leur localisation, et ensuite, d'étudier la thermographie de surface en séries temporelles allant de 2013 à 2025. Ces informations servieront ensuite pour créer un outil d'aide à la décision dédié au décideurs du Festival d'Avignon, dans l'objectif, par exemple, de s'inspirer des théâtres les plus frais pour aménager les théâtres les plus chauds.
+L'objectif est donc de recenser les théâtres du Festival d'Avignon IN pour 2025 en incluant des attributs descriptifs, ainsi que leur localisation, et ensuite, d'étudier la thermographie de surface en séries temporelles allant de 2013 à 2025. Ces informations serviront ensuite pour créer un outil d'aide à la décision dédié aux décideurs du Festival d'Avignon, dans l'objectif, par exemple, de s'inspirer des théâtres les plus frais pour aménager les théâtres les plus chauds.
+
+Cette base de données est créée de toute pièce spécifiquement pour ce travail, et dans l'optique de répondre aux besoins métiers du Festival d'Avignon.
 
 ## 2. Modèle logique de données
 
-La table `THEATRE` représente les 35 théâtres qui ont acceuillis au moins un spectacle lors du Festival d'Avignon IN. Elle est composée de différents attributs descriptifs dont la capacité d'acceuil et la géolocalisation.
+La base de données est composée de quatre tables (dont une pour des données raster), une vue et une vue matérialisée.
 
-La table des `SPECTACLE` représente les oeuvres artistiques.
+Premièrement, la table `THEATRE` représente les 35 théâtres qui ont accueillis au moins un spectacle lors du Festival d'Avignon IN 2025. Elle est composée de différents attributs descriptifs, dont la capacité d'accueil et la géolocalisation.
 
-Il y a une relation n:n entre les théâtre et les spectacles. Un théâtre acceuille plusieurs spectacles, et un spectacle peut se jouer dans plusieurs théâtres. De ce fait, il y a une table de relation nommée `R_SPECT_DATE` entre les deux, qui décrit une représentation théâtrale, à un lieu donné et à un moment donné.
+La table des `SPECTACLE` représente les œuvres artistiques.
 
-Avec ces trois tables, nous créons la vue `THEATRE_AVEC_SPEC` dans laquelle nous ajoutons le nombre de représentation théâtrale pour chaque théâtre. Et comme nous connaissons la capacité d'acceuil de chaque théâtre, nous pouvons calculer l'affluence des théâtres pendant l'entièreté du Festival d'Avignon 2025, si on suppose un taux de fréquentation de 100% : $nb\_pers\_acc = capacite * nb\_spectacles$.
+Il y a une relation n:n entre les théâtres et les spectacles. Un théâtre accueille plusieurs spectacles, et un spectacle peut se jouer dans plusieurs théâtres. De ce fait, il y a une table de relation nommée `R_SPECT_DATE` entre les deux, qui décrit une représentation théâtrale, à un lieu donné et à un moment donné.
 
-Nous choissons de créer une vue simple pour cette table, car elle ne nécessite pas beaucoup de ressources à calculer, dans la mesure où on sélectionne les attributs de la table THEATRE, et nous faisons une simple multiplication.
+Avec ces trois tables, nous créons la vue `THEATRE_AVEC_SPEC` dans laquelle nous ajoutons le nombre de représentations théâtrales pour chaque théâtre. Nous connaissons la capacité d'acceuil de chaque théâtre. Ainsi, pour calculer l'affluence des théâtres pendant l'entièreté du Festival d'Avignon 2025, on suppose un taux de fréquentation de 100% : $nb\_pers\_acc = capacite * nb\_spectacles$.
 
-Ensuite, pour étudier la température, nous traitons des images Landsat 8 pour extraire la thermographie de surface à l'aide d'un [script R](https://github.com/Mercatorien/ICU_FESTIVAL_AVIGNON/blob/e5853963ac0549ff46978fa9332641320a91a692/scripts_r/CALCUL_LST.R). Il permet de calculer pour chaque année, un raster qui décrit la température de surface. Nous mettons ces données dans la table **LST** (*Land Surface Temperature*). Cette table contient une image par année entre 2013 et 2025, prises aux dates suivantes (autour de juillet)
+Nous choisissons de créer une vue simple pour cette table, car elle ne nécessite pas beaucoup de ressources à calculer, dans la mesure où on sélectionne les attributs de la table THEATRE, et nous faisons une simple multiplication.
+
+Ensuite, pour étudier la température, nous traitons des images Landsat 8 pour extraire la thermographie de surface à l'aide d'un [script R](https://github.com/Mercatorien/DM_BDD/blob/6470ee20f6e7705b2d81bfbd3ff35cbab2b36039/R/CALCUL_LST.R). Il permet de calculer pour chaque année, un raster qui décrit la température de surface. Nous mettons ces données dans la table **LST** (*Land Surface Temperature*). Cette table contient une image par année entre 2013 et 2025, prises aux dates suivantes (autour de juillet)
 
 2013-07-30
 2014-07-17
@@ -105,24 +111,32 @@ Ainsi, on peut prélever les valeurs des rasters vers les entités ponctuelles d
 
 Il y a une relation d'intersection entre les LST.
 
-Nous choissons de faire une vue matérialisée dans la mesure où le prélèvement des valeurs des LST vers les points peut prendre du temps, surtout dans l'optique où la base est pensée pour être développée en continue avec des nouvelles données et des nouveaux théâtres.
+Nous choisissons de faire une vue matérialisée dans la mesure où le prélèvement des valeurs des LST vers les points peut prendre du temps, surtout dans l'optique où la base est pensée pour être développée en continu avec des nouvelles données et des nouveaux théâtres.
 
 Certaines contraintes sont également décrites dans le modèle logique de données.
 
-Cette base de donnée permet d'assurer :
+Cette base de données permet d'assurer :
 
 - La contrainte d'unicité (clés primaires)
   
 - La contrainte d'intégrité référentielle (clés étrangères et cardinalités)
   
+- L'atomicité
+  
 
-![MLD](https://github.com/Mercatorien/DM_BDD/raw/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/MLD.png)
+Toutes les tables sont indexées spatialement, et les tables les plus grosses ont indexées attributairement.
+
+![](https://github.com/Mercatorien/DM_BDD/raw/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/MLD.png)
+
+Le DDL est disponible ici : [DDL](https://github.com/Mercatorien/DM_BDD/blob/64c463221aacc5c111ec8c95a5687243d9c31f44/DDL.sql)
 
 ## 3. Exploitation de la base
 
+### Carte
+
 Avec la vue `THEATRE_AVEC_SPEC`, on a la possibilité de cartographier l'affluence dans les théâtres du Festival IN d'Avignon 2025 avec des cercles proportionnels.
 
-Cette carte est obtenue par le code permettant de créer la vue `THEATRE_AVEC_SPEC` :
+Cette carte est obtenue par le code permettant de créer la vue `THEATRE_AVEC_SPEC`. Cette requête prend tous les théâtres (avec `LEFT JOIN`) et compte le nombre d'`id_s` (PK des spectacles). Ensuite, on multiplie ce résultat par la capacité, pour obtenir le nombre de personnes accueuillies.
 
 ```sql
 CREATE OR REPLACE VIEW THEATRE_AVEC_SPECTACLE
@@ -147,11 +161,13 @@ ALTER TABLE THEATRE_AVEC_SPECTACLE
     OWNER TO postgres;  
 ```
 
-![MLD](https://github.com/Mercatorien/DM_BDD/raw/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/CARTE.png)
+![](https://github.com/Mercatorien/DM_BDD/raw/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/CARTE.png)
+
+### Requêtes
 
 Trois requêtes intéressantes réalisables avec cette base de données.
 
-Top 10 des spectacles les plus joués
+#### Top 10 des spectacles les plus joués
 
 ```sql
 SELECT
@@ -164,7 +180,7 @@ ORDER BY nb_representations DESC
 LIMIT 10;
 ```
 
-Le jour le plus chaud pour chaque théâtre
+#### Le jour le plus chaud pour chaque théâtre
 
 ```sql
 SELECT DISTINCT ON (tls.id_theatre)
@@ -177,28 +193,26 @@ JOIN THEATRE t ON t.id_t = tls.id_theatre
 ORDER BY tls.id_theatre, tls.temp DESC;
 ```
 
-Relation entre la température et l’activité du théâtre
+#### Relation entre la température et l’activité du théâtre
 
 ```sql
 WITH temp_moy AS (
-    SELECT
+    SELECT 
         tls.id_theatre,
         AVG(tls.temp) AS temp_moy
     FROM THEATRE_LST_SERIE tls
     GROUP BY tls.id_theatre
 )
-
-SELECT
+SELECT 
     corr(temp_moy.temp_moy, tas.nb_pers_acc::float) AS coeff_correlation
 FROM temp_moy
 JOIN THEATRE_AVEC_SPECTACLE tas ON tas.id_t = temp_moy.id_theatre;
 ```
 
-
 ### R
 
-Ensuite, pour exploiter plus pronfondément cette base de données, on la connecte à R, pour pouvoir faire des graphiques. [Code disponible ici](https://github.com/Mercatorien/DM_BDD/blob/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/R/EXPLOITATION_DONNEES.R).
+Ensuite, pour exploiter plus profondément cette base de données, on la connecte à R, pour pouvoir faire des graphiques. [Code disponible ici](https://github.com/Mercatorien/DM_BDD/blob/8201b3e26cb148e60ae3e756e09fe97cd20ccd5c/R/EXPLOITATION_DONNEES.R).
 
 Ce code permet de représenter sur un graphique l'évolution des températures entre 2013 et 2025 pour les théâtres. Ces derniers sont classé par ordre de température moyenne.
 
-![MLD](https://github.com/Mercatorien/DM_BDD/raw/64c463221aacc5c111ec8c95a5687243d9c31f44/GRAPHIQUES/theatre_LST_graphs.png)
+![](https://github.com/Mercatorien/DM_BDD/raw/64c463221aacc5c111ec8c95a5687243d9c31f44/GRAPHIQUES/theatre_LST_graphs.png)
